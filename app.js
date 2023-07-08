@@ -11,7 +11,7 @@ function logMessage(message, type) {
   
   // Set the color based on the type
   if (type === 'status') {
-      span.style.color = 'gray';
+      span.style.color = 'lightgray';
   } else if (type === 'command') {
       span.style.color = 'gold';
   } else if (type === 'response') {
@@ -28,32 +28,70 @@ function logMessage(message, type) {
   log.scrollTop = log.scrollHeight;
 }
 
+logMessage('Tackle Sensor Configurator', 'status');
+logMessage('--------------------------', 'status');
+logMessage('Connect a tackle sensor to your PC via a serial port.', 'status');
+logMessage('Click "Connect" to begin.', 'status');
+logMessage('', 'status');
 
-// Button event to connect to the device
-document.getElementById('connect-button').addEventListener('click', async () => {
-  try {
-    port = await navigator.serial.requestPort();
-    logMessage('Requesting port ' + port + '...', 'status');
+let connected = false;
+const connectButton = document.getElementById('connect-button');
 
-    await port.open({ baudRate: 9600 });
-    logMessage('Port opened', 'status');
+connectButton.addEventListener('click', async () => {
+  if (connected) {
+    // Disconnect from the device
+    try {
+      await reader.cancel();
+      await inputDone.catch(() => {});
+      reader = null;
+      inputDone = null;
 
-    let decoder = new TextDecoderStream();
-    inputDone = port.readable.pipeTo(decoder.writable);
-    inputStream = decoder.readable;
+      await outputStream.getWriter().close();
+      await outputDone;
+      outputStream = null;
 
-    let encoder = new TextEncoderStream();
-    outputDone = encoder.readable.pipeTo(port.writable);
-    outputStream = encoder.writable;
+      await port.close();
+      port = null;
 
-    // Read from the input stream and display the results
-    reader = inputStream.getReader();
-    readLoop();
-    logMessage('Reading from input stream...', 'status');
-  } catch (err) {
-    logMessage('Error: ' + err.message, 'error');
+      logMessage('Disconnected', 'status');
+      connected = false;
+      connectButton.textContent = 'Connect';  // Update button text
+    } catch (err) {
+      logMessage('Error disconnecting: ' + err.message, 'error');
+    }
+  } else {
+    // Connect to the device
+    try {
+      connectButton.textContent = 'Connecting...';  // Update button text
+      port = await navigator.serial.requestPort();
+      logMessage('Requesting port...', 'status');
+
+      await port.open({ baudRate: 9600 });
+      logMessage('Port opened', 'status');
+
+      let decoder = new TextDecoderStream();
+      inputDone = port.readable.pipeTo(decoder.writable);
+      inputStream = decoder.readable;
+
+      let encoder = new TextEncoderStream();
+      outputDone = encoder.readable.pipeTo(port.writable);
+      outputStream = encoder.writable;
+
+      // Read from the input stream and display the results
+      reader = inputStream.getReader();
+      readLoop();
+      logMessage('Reading from input stream...', 'status');
+
+      connected = true;
+      connectButton.textContent = 'Disconnect';  // Update button text
+    } catch (err) {
+      logMessage('Error connecting: ' + err.message, 'error');
+      connectButton.textContent = 'Connect';  // Revert button text if connection failed
+    }
   }
 });
+
+
 
 
 // Function to handle incoming data
@@ -108,14 +146,24 @@ async function writeToDevice(cmd) {
     logMessage(cmd, 'command');
 }
 
-document.getElementById('setColorButton').addEventListener('click', async () => {
-    let color = document.getElementById('colorPicker').value;
-    
-    // Convert color to RGB
-    let rgb = hexToRgb(color);
-    
-    // Send command to set LED color
-    await writeToDevice(`SET_LED:${rgb.r},${rgb.g},${rgb.b}\n`);
+document.getElementById('setHomeColorButton').addEventListener('click', async () => {
+  const color = document.getElementById('homeColorPicker').value;
+
+  // Convert color to RGB
+  let rgb = hexToRgb(color);
+
+  // Send command to set LED color
+  await writeToDevice(`SET_HOME_LED:${rgb.r},${rgb.g},${rgb.b}\n`);
+});
+
+document.getElementById('setAwayColorButton').addEventListener('click', async () => {
+  const color = document.getElementById('awayColorPicker').value;
+  
+  // Convert color to RGB
+  let rgb = hexToRgb(color);
+  
+  // Send command to set LED color
+  await writeToDevice(`SET_AWAY_LED:${rgb.r},${rgb.g},${rgb.b}\n`);
 });
 
 function hexToRgb(hex) {

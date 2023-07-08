@@ -1,20 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Web Serial Interface</title>
+    <title>Tackle Sensor Configurator</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="icon" href="images/monitor.png" type="image/png">
 </head>
 <body>
     <div class="app-container">
-        <h1>Device Control Panel</h1>
+        <h1>Tackle Sensor Configurator</h1>
         <p>Connect to your device and control LED color</p>
         <button id="connect-button" class="connect-button">Connect</button>
         <div class="color-control">
-            <label for="colorPicker">Select LED color:</label>
-            <input type="color" id="colorPicker">
-            <button id="setColorButton">Set LED Color</button>
+            <div class="color-option">
+                <label for="homeColorPicker">Select Home Jersey Color:</label>
+                <input type="color" id="homeColorPicker">
+                <button id="setHomeColorButton">Send</button>
+            </div>
+        
+            <div class="color-option">
+                <label for="awayColorPicker">Select Away Jersey Color:</label>
+                <input type="color" id="awayColorPicker">
+                <button id="setAwayColorButton">Send</button>
+            </div>
+        </div>      
+        <div class="log-container">
+            <div class="log-header">
+                <h2>Log</h2>
+            </div>
+            <div class="log" id="log"></div>
         </div>
-        <div class="log" id="log"></div>
     </div>
     <script src="app.js"></script>
 </body>
