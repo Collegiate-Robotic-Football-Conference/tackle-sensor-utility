@@ -5,30 +5,7 @@ let outputDone;
 let inputStream;
 let outputStream;
 
-window.addEventListener('DOMContentLoaded', (event) => {
-  checkConnectionStatus();
-});
-
 let connected = false;
-
-function checkConnectionStatus() {
-  // If currently connected
-  if (connected) {
-    // Remove the overlays and enable interactions
-    document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'none');
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('disabled');
-        tab.style.pointerEvents = "auto"; // Enable pointer events
-    });
-} else { // If currently disconnected
-    // Show the overlays and disable interactions
-    document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'block');
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.add('disabled');
-        tab.style.pointerEvents = "none"; // Disable pointer events
-    });
-}
-}
 
 function logMessage(message, type) {
   const log = document.getElementById('log');
@@ -201,28 +178,26 @@ document.getElementById('setHomeColorButton').addEventListener('click', async ()
   await writeToDevice(`rgb:${rgb.r},${rgb.g},${rgb.b}\n`);
 });
 
-document.getElementById('setAwayColorButton').addEventListener('click', async () => {
-  const color = document.getElementById('awayColorPicker').value;
-  
-  // Convert color to RGB
-  let rgb = hexToRgb(color);
-  
-  // Send command to set LED color
-  await writeToDevice(`SET_AWAY_LED:${rgb.r},${rgb.g},${rgb.b}\n`);
-});
-
 document.getElementById('homeAwayToggle').addEventListener('change', function() {
   let status = this.checked ? 'Home' : 'Away';
   document.getElementById('homeAwayStatus').textContent = status;
   // Send serial command here with the status
-  // For example: sendSerialCommand('SET_HOME_AWAY', status);
+  if( status == 'Home' ) {
+    writeToDevice('home:1\n');
+  } else {  
+    writeToDevice('home:0\n');
+  }
 });
 
 document.getElementById('eligibilityToggle').addEventListener('change', function() {
   let status = this.checked ? 'Eligible' : 'Ineligible';
   document.getElementById('eligibilityStatus').textContent = status;
   // Send serial command here with the status
-  // For example: sendSerialCommand('SET_ELIGIBILITY', status);
+  if( status == 'Eligible' ) {
+    writeToDevice('eligible:1\n');
+  } else {  
+    writeToDevice('eligible:0\n');
+  }
 });
 
 document.getElementById('accelX').textContent = yourXValue;
