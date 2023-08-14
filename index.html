@@ -7,54 +7,73 @@
 </head>
 <body>
     <div class="app-container">
-        <h1>Tackle Sensor Configurator</h1>
-        <p>Connect to your device and control LED color</p>
-        <button id="connect-button" class="connect-button">Connect</button>
-        <div class="color-control">
-            <div class="color-option">
-                <label for="homeColorPicker">Select Home Jersey Color:</label>
-                <input type="color" id="homeColorPicker">
-                <button id="setHomeColorButton">Send</button>
-            </div>
-        </div>
-        <div class="slide-container">
-            <div class="switch-container">
-                <span class="status-label">Away</span>
-                <label class="switch">
-                    <input type="checkbox" id="homeAwayToggle">
-                    <span class="slider round"></span>
-                </label>
-                <span class="status-label">Home</span>
-            </div>
+
+        <!-- Always Visible Section -->
+        <div class="top-section">
+            <h1>Tackle Sensor Configurator</h1>
+            <p>Connect to your device and control LED color</p>
+            <button class="connect-button" id="connect-button">Connect</button>
         </div>
         
-        <div class="slide-container">
-            <div class="switch-container">
-                <span class="status-label">Ineligible</span>
-                <label class="switch">
-                    <input type="checkbox" id="eligibilityToggle">
-                    <span class="slider round"></span>
-                </label>
-                <span class="status-label">Eligible</span>
+        <!-- Tabs Section -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('configure', event)" disabled>Configure</button>
+            <button class="tab-button" onclick="showTab('monitor', event)" disabled>Monitor</button>                       
+        </div>
+    
+        <!-- Configure Tab Content -->
+        <div id="configure" class="tab-content" style="display: block;">
+            <div class="tab-overlay" id="configure-overlay" style="display: block;"></div>
+            <!-- Place all the configuration-related content here -->
+            <div class="color-control">
+                <div class="color-option">
+                    <label for="homeColorPicker">Select Home Jersey Color:</label>
+                    <input type="color" id="homeColorPicker">
+                    <button id="setHomeColorButton">Send</button>
+                </div>
+            </div>
+            <div class="slide-container">
+                <div class="switch-container">
+                    <span class="status-label">Away</span>
+                    <label class="switch">
+                        <input type="checkbox" id="homeAwayToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="status-label">Home</span>
+                </div>
+            </div>
+            
+            <div class="slide-container">
+                <div class="switch-container">
+                    <span class="status-label">Ineligible</span>
+                    <label class="switch">
+                        <input type="checkbox" id="eligibilityToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="status-label">Eligible</span>
+                </div>
             </div>
         </div>
-        
-             
+    
+        <!-- Monitor Tab Content -->
+        <div id="monitor" class="tab-content" style="display: none;">
+            <div class="tab-overlay" id="monitor-overlay" style="display: block;"></div>
+            <h3>Device Status:</h3>
+            <div><strong>Acceleration X:</strong> <span id="accelX">0.0</span></div>
+            <div><strong>Acceleration Y:</strong> <span id="accelY">0.0</span></div>
+            <div><strong>Acceleration Z:</strong> <span id="accelZ">0.0</span></div>
+            <div><strong>Output Tackled Status:</strong> <span id="tackledStatus">Unknown</span></div>
+            <div><strong>Input Home/Away:</strong> <span id="homeAwayStatus">Away</span></div>
+            <div><strong>Input Eligible/Ineligible:</strong> <span id="eligibilityStatus">Ineligible</span></div>
+        </div>
+
+        <!-- Log Section -->
         <div class="log-container">
             <div class="log-header">
                 <h2>Log</h2>
             </div>
             <div class="log" id="log"></div>
         </div>
-    </div>
-    <div class="floating-box">
-        <h3>Device Status:</h3>
-        <div><strong>Acceleration X(g):</strong> <span id="accelX">0.0</span></div>
-        <div><strong>Acceleration Y(g):</strong> <span id="accelY">0.0</span></div>
-        <div><strong>Acceleration Z(g):</strong> <span id="accelZ">0.0</span></div>
-        <div><strong>Output Tackled Status:</strong> <span id="tackledStatus">False</span></div>
-        <div><strong>Input Home/Away:</strong> <span id="homeAwayStatus">Away</span></div>
-        <div><strong>Input Eligible/Ineligible:</strong> <span id="eligibilityStatus">Ineligible</span></div>
     </div>
     
     <script src="app.js"></script>
