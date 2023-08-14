@@ -5,6 +5,31 @@ let outputDone;
 let inputStream;
 let outputStream;
 
+window.addEventListener('DOMContentLoaded', (event) => {
+  checkConnectionStatus();
+});
+
+let connected = false;
+
+function checkConnectionStatus() {
+  // If currently connected
+  if (connected) {
+    // Remove the overlays and enable interactions
+    document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'none');
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('disabled');
+        tab.style.pointerEvents = "auto"; // Enable pointer events
+    });
+} else { // If currently disconnected
+    // Show the overlays and disable interactions
+    document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'block');
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('disabled');
+        tab.style.pointerEvents = "none"; // Disable pointer events
+    });
+}
+}
+
 function logMessage(message, type) {
   const log = document.getElementById('log');
   const span = document.createElement('span');
@@ -34,7 +59,7 @@ logMessage('Connect a tackle sensor to your PC via a serial port.', 'status');
 logMessage('Click "Connect" to begin.', 'status');
 logMessage('', 'status');
 
-let connected = false;
+
 const connectButton = document.getElementById('connect-button');
 
 connectButton.addEventListener('click', async () => {
