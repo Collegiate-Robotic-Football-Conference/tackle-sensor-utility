@@ -16,13 +16,30 @@
                 <input type="color" id="homeColorPicker">
                 <button id="setHomeColorButton">Send</button>
             </div>
-        
-            <div class="color-option">
-                <label for="awayColorPicker">Select Away Jersey Color:</label>
-                <input type="color" id="awayColorPicker">
-                <button id="setAwayColorButton">Send</button>
+        </div>
+        <div class="slide-container">
+            <div class="switch-container">
+                <span class="status-label">Away</span>
+                <label class="switch">
+                    <input type="checkbox" id="homeAwayToggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="status-label">Home</span>
             </div>
-        </div>      
+        </div>
+        
+        <div class="slide-container">
+            <div class="switch-container">
+                <span class="status-label">Ineligible</span>
+                <label class="switch">
+                    <input type="checkbox" id="eligibilityToggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="status-label">Eligible</span>
+            </div>
+        </div>
+        
+             
         <div class="log-container">
             <div class="log-header">
                 <h2>Log</h2>
@@ -30,6 +47,16 @@
             <div class="log" id="log"></div>
         </div>
     </div>
+    <div class="floating-box">
+        <h3>Device Status:</h3>
+        <div><strong>Acceleration X(g):</strong> <span id="accelX">0.0</span></div>
+        <div><strong>Acceleration Y(g):</strong> <span id="accelY">0.0</span></div>
+        <div><strong>Acceleration Z(g):</strong> <span id="accelZ">0.0</span></div>
+        <div><strong>Output Tackled Status:</strong> <span id="tackledStatus">False</span></div>
+        <div><strong>Input Home/Away:</strong> <span id="homeAwayStatus">Away</span></div>
+        <div><strong>Input Eligible/Ineligible:</strong> <span id="eligibilityStatus">Ineligible</span></div>
+    </div>
+    
     <script src="app.js"></script>
 </body>
 </html>

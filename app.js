@@ -66,7 +66,7 @@ connectButton.addEventListener('click', async () => {
       port = await navigator.serial.requestPort();
       logMessage('Requesting port...', 'status');
 
-      await port.open({ baudRate: 9600 });
+      await port.open({ baudRate: 115200 });
       logMessage('Port opened', 'status');
 
       let decoder = new TextDecoderStream();
@@ -153,7 +153,7 @@ document.getElementById('setHomeColorButton').addEventListener('click', async ()
   let rgb = hexToRgb(color);
 
   // Send command to set LED color
-  await writeToDevice(`SET_HOME_LED:${rgb.r},${rgb.g},${rgb.b}\n`);
+  await writeToDevice(`rgb:${rgb.r},${rgb.g},${rgb.b}\n`);
 });
 
 document.getElementById('setAwayColorButton').addEventListener('click', async () => {
@@ -165,6 +165,25 @@ document.getElementById('setAwayColorButton').addEventListener('click', async ()
   // Send command to set LED color
   await writeToDevice(`SET_AWAY_LED:${rgb.r},${rgb.g},${rgb.b}\n`);
 });
+
+document.getElementById('homeAwayToggle').addEventListener('change', function() {
+  let status = this.checked ? 'Home' : 'Away';
+  document.getElementById('homeAwayStatus').textContent = status;
+  // Send serial command here with the status
+  // For example: sendSerialCommand('SET_HOME_AWAY', status);
+});
+
+document.getElementById('eligibilityToggle').addEventListener('change', function() {
+  let status = this.checked ? 'Eligible' : 'Ineligible';
+  document.getElementById('eligibilityStatus').textContent = status;
+  // Send serial command here with the status
+  // For example: sendSerialCommand('SET_ELIGIBILITY', status);
+});
+
+document.getElementById('accelX').textContent = yourXValue;
+document.getElementById('accelY').textContent = yourYValue;
+document.getElementById('accelZ').textContent = yourZValue;
+// TODO: 
 
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
