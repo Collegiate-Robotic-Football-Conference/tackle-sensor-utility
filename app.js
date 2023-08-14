@@ -140,6 +140,10 @@ async function readLoop() {
           const y = parseFloat(data[1].split('=')[1]);
           const z = parseFloat(data[2].split('=')[1]);
 
+          document.getElementById('accelX').textContent = x;
+          document.getElementById('accelY').textContent = y;
+          document.getElementById('accelZ').textContent = z;
+
           if (isNaN(x) || isNaN(y) || isNaN(z)) {
             throw new Error('Invalid acceleration data');
           }
@@ -178,32 +182,27 @@ document.getElementById('setHomeColorButton').addEventListener('click', async ()
   await writeToDevice(`rgb:${rgb.r},${rgb.g},${rgb.b}\n`);
 });
 
-document.getElementById('homeAwayToggle').addEventListener('change', function() {
-  let status = this.checked ? 'Home' : 'Away';
-  document.getElementById('homeAwayStatus').textContent = status;
-  // Send serial command here with the status
-  if( status == 'Home' ) {
-    writeToDevice('home:1\n');
-  } else {  
-    writeToDevice('home:0\n');
-  }
-});
+// document.getElementById('homeAwayToggle').addEventListener('change', async (event) => {
+//   let status = event.target.checked ? 'Home' : 'Away';
+//   document.getElementById('homeAwayStatus').textContent = status;
+//   // Send serial command here with the status
+//   if( status == 'Home' ) {
+//     await writeToDevice('home:1\n');
+//   } else {  
+//     await writeToDevice('home:0\n');
+//   }
+// });
 
-document.getElementById('eligibilityToggle').addEventListener('change', function() {
-  let status = this.checked ? 'Eligible' : 'Ineligible';
-  document.getElementById('eligibilityStatus').textContent = status;
-  // Send serial command here with the status
-  if( status == 'Eligible' ) {
-    writeToDevice('eligible:1\n');
-  } else {  
-    writeToDevice('eligible:0\n');
-  }
-});
-
-document.getElementById('accelX').textContent = yourXValue;
-document.getElementById('accelY').textContent = yourYValue;
-document.getElementById('accelZ').textContent = yourZValue;
-// TODO: 
+// document.getElementById('eligibilityToggle').addEventListener('change', async (event) => {
+//   let status = event.target.checked ? 'Eligible' : 'Ineligible';
+//   document.getElementById('eligibilityStatus').textContent = status;
+//   // Send serial command here with the status
+//   if( status == 'Eligible' ) {
+//     await writeToDevice('eligible:1\n');
+//   } else {  
+//     await writeToDevice('eligible:0\n');
+//   }
+// });
 
 function showTab(tabName, event) {
   // Get all tab content elements and hide them
