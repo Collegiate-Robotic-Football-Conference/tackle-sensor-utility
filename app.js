@@ -36,7 +36,6 @@ logMessage('Connect a tackle sensor to your PC via a serial port.', 'status');
 logMessage('Click "Connect" to begin.', 'status');
 logMessage('', 'status');
 
-
 const connectButton = document.getElementById('connect-button');
 
 connectButton.addEventListener('click', async () => {
@@ -105,6 +104,25 @@ connectButton.addEventListener('click', async () => {
             tab.classList.remove('disabled');
             tab.style.pointerEvents = "auto"; // Enable pointer events
         });
+
+        // Setup Periodic Requests
+        
+        const accelInterval = setInterval(() => {
+          writeToDevice(`accel\nhome\neligible\ntackled\n`);
+        }, 500);
+
+        // const homeInterval = setInterval(() => {
+        //   writeToDevice(`home\n`);
+        // }, 2000);
+
+        // const eligibleInterval = setInterval(() => {
+        //   writeToDevice(`eligible\n`);
+        // }, 2000);
+
+        // const tackledInterval = setInterval(() => {
+        //   writeToDevice(`tackled\n`);
+        // }, 2000);
+
   } else { // If currently disconnected
         // Show the overlays and disable interactions
         document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'block');
@@ -112,54 +130,90 @@ connectButton.addEventListener('click', async () => {
             tab.classList.add('disabled');
             tab.style.pointerEvents = "none"; // Disable pointer events
         });
+
+        clearInterval(accelInterval);
+        clearInterval(homeInterval);
+        clearInterval(eligibleInterval);
+        clearInterval(tackledInterval);
   }
 });
 
+let dataBuffer = '';
 
-// Function to handle incoming data
 async function readLoop() {
   while (true) {
     const { value, done } = await reader.read();
     if (value) {
-      logMessage('Received: ' + value, 'response');
+      dataBuffer += value;  // Append data to buffer
 
-      // Parse GET_ACCEL response
-      if (value.startsWith('OK:GET_ACCEL')) {
-        try {
-          const parts = value.split(':');
-          if (parts.length < 3) {
-            throw new Error('Invalid response format');
+      // Check if buffer contains a newline (indicating a complete message)
+      let newlineIndex = dataBuffer.indexOf('\n');
+      while (newlineIndex > -1) {
+        let message = dataBuffer.substring(0, newlineIndex);  // Extract the complete message
+        processMessage(message.trim());  // Process the message
+        dataBuffer = dataBuffer.substring(newlineIndex + 1);  // Remove the processed message from the buffer
+        newlineIndex = dataBuffer.indexOf('\n');  // Check again for another complete message
+      }
+    }
+
+    if (done) {
+      reader.releaseLock();
+      break;
+    }
+  }
+}
+
+function processMessage(message) {
+  logMessage(message, 'response');
+
+  // Parse GET_ACCEL response
+  if (message.startsWith('accel:')) {
+      try {
+          const parts = message.split(':');
+          if (parts.length < 2) {
+              throw new Error('Invalid response format');
           }
 
-          const data = parts[2].split(',');
+          const data = parts[1].split(',');
           if (data.length < 3) {
-            throw new Error('Missing acceleration data');
+              throw new Error('Missing acceleration data');
           }
 
-          const x = parseFloat(data[0].split('=')[1]);
-          const y = parseFloat(data[1].split('=')[1]);
-          const z = parseFloat(data[2].split('=')[1]);
+          const x = parseFloat(data[0]);
+          const y = parseFloat(data[1]);
+          const z = parseFloat(data[2]);
 
           document.getElementById('accelX').textContent = x;
           document.getElementById('accelY').textContent = y;
           document.getElementById('accelZ').textContent = z;
 
           if (isNaN(x) || isNaN(y) || isNaN(z)) {
-            throw new Error('Invalid acceleration data');
+              throw new Error('Invalid acceleration data');
           }
 
           // Now x, y, and z contain the acceleration data
           // You can use these values to update your UI
           console.log(`Acceleration - X: ${x}, Y: ${y}, Z: ${z}`);
-        } catch (err) {
+      } catch (err) {
           logMessage('Error parsing response: ' + err.message, 'error');
-        }
       }
-    }
-    if (done) {
-      reader.releaseLock();
-      break;
-    }
+  }
+  // Parse home: response
+  else if (message.startsWith('home:')) {
+      const status = parseInt(message.split(':')[1], 10);
+      const displayStatus = (status === 1) ? 'Home' : 'Away';
+      document.getElementById('homeAwayStatus').textContent = displayStatus;
+  }
+  // Parse eligible: response
+  else if (message.startsWith('eligible:')) {
+      const status = parseInt(message.split(':')[1], 10);
+      const displayStatus = (status === 1) ? 'Eligible' : 'Ineligible';
+      document.getElementById('eligibilityStatus').textContent = displayStatus;
+  }
+  else if (message.startsWith('tackled:')) {
+      const status = parseInt(message.split(':')[1], 10);
+      const displayStatus = (status === 1) ? 'Tackled' : 'Not Tackled';
+      document.getElementById('tackledStatus').textContent = displayStatus;
   }
 }
 
