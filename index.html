@@ -11,61 +11,56 @@
         <!-- Always Visible Section -->
         <div class="top-section">
             <h1>Tackle Sensor Configurator</h1>
-            <p>Connect to your device and control LED color</p>
             <button class="connect-button" id="connect-button">Connect</button>
         </div>
-        
-        <!-- Tabs Section -->
-        <div class="tabs">
-            <button class="tab-button active" onclick="showTab('configure', event)" disabled>Configure</button>
-            <button class="tab-button" onclick="showTab('monitor', event)" disabled>Monitor</button>                       
-        </div>
     
-        <!-- Configure Tab Content -->
-        <div id="configure" class="tab-content" style="display: block;">
-            <div class="tab-overlay" id="configure-overlay" style="display: block;"></div>
-            <!-- Place all the configuration-related content here -->
+        <!-- Configuration Content -->
+        <div id="configure">
+            <!-- Color Control -->
             <div class="color-control">
                 <div class="color-option">
                     <label for="homeColorPicker">Select Home Jersey Color:</label>
-                    <input type="color" id="homeColorPicker">
+                    <input type="color" id="homeColorPicker" value="#0000FF">
                     <button id="setHomeColorButton">Send</button>
                 </div>
             </div>
-            <!-- <div class="slide-container">
-                <div class="switch-container">
-                    <span class="status-label">Away</span>
-                    <label class="switch">
-                        <input type="checkbox" id="homeAwayToggle">
-                        <span class="slider round"></span>
-                    </label>
-                    <span class="status-label">Home</span>
-                </div>
-            </div>
-            
-            <div class="slide-container">
-                <div class="switch-container">
-                    <span class="status-label">Ineligible</span>
-                    <label class="switch">
-                        <input type="checkbox" id="eligibilityToggle">
-                        <span class="slider round"></span>
-                    </label>
-                    <span class="status-label">Eligible</span>
-                </div>
-            </div> -->
         </div>
     
-        <!-- Monitor Tab Content -->
-        <div id="monitor" class="tab-content" style="display: none;">
-            <div class="tab-overlay" id="monitor-overlay" style="display: block;"></div>
+        <!-- Monitor Content -->
+        <div id="monitor">
             <h3>Device Status:</h3>
-            <div><strong>Acceleration X:</strong> <span id="accelX">0.0</span></div>
-            <div><strong>Acceleration Y:</strong> <span id="accelY">0.0</span></div>
-            <div><strong>Acceleration Z:</strong> <span id="accelZ">0.0</span></div>
-            <div><strong>Output Tackled Status:</strong> <span id="tackledStatus">Unknown</span></div>
-            <div><strong>Input Home/Away:</strong> <span id="homeAwayStatus">Away</span></div>
-            <div><strong>Input Eligible/Ineligible:</strong> <span id="eligibilityStatus">Ineligible</span></div>
+            <table>
+                <tr>
+                    <td><strong>Version:</strong></td>
+                    <td id="version">Unknown</td>
+                </tr>
+                <tr>
+                    <td><strong>Acceleration X:</strong></td>
+                    <td id="accelX">Unknown</td>
+                </tr>
+                <tr>
+                    <td><strong>Acceleration Y:</strong></td>
+                    <td id="accelY">Unknown</td>
+                </tr>
+                <tr>
+                    <td><strong>Acceleration Z:</strong></td>
+                    <td id="accelZ">Unknown</td>
+                </tr>
+                <tr>
+                    <td><strong>Output Tackled Status:</strong></td>
+                    <td id="tackledStatus">Unknown</td>
+                </tr>
+                <tr>
+                    <td><strong>Input Home/Away:</strong></td>
+                    <td id="homeAwayStatus">Unknown</td>
+                </tr>
+                <tr>
+                    <td><strong>Input Eligible/Ineligible:</strong></td>
+                    <td id="eligibilityStatus">Unknown</td>
+                </tr>
+            </table>
         </div>
+
 
         <!-- Log Section -->
         <div class="log-container">

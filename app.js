@@ -13,14 +13,14 @@ function logMessage(message, type) {
   
   // Set the color based on the type
   if (type === 'status') {
-      span.style.color = 'lightgray';
+      span.style.color = '#276880';
   } else if (type === 'command') {
-      span.style.color = 'gold';
+      span.style.color = '#57ACDC';
   } else if (type === 'response') {
-      span.style.color = 'green';
+      span.style.color = '#60C689';
   } else if (type === 'error') {
-    span.style.color = 'red';
-}
+    span.style.color = '#E91E63';
+  }
 
   span.textContent = message;
   log.appendChild(span);
@@ -98,12 +98,12 @@ connectButton.addEventListener('click', async () => {
 
   // If currently connected
   if (connected) {
-        // Remove the overlays and enable interactions
-        document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'none');
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('disabled');
-            tab.style.pointerEvents = "auto"; // Enable pointer events
-        });
+        // // Remove the overlays and enable interactions
+        // document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'none');
+        // document.querySelectorAll('.tab-content').forEach(tab => {
+        //     tab.classList.remove('disabled');
+        //     tab.style.pointerEvents = "auto"; // Enable pointer events
+        // });
 
         writeToDevice(`version\n`);
 
@@ -127,12 +127,12 @@ connectButton.addEventListener('click', async () => {
 
 
   } else { // If currently disconnected
-        // Show the overlays and disable interactions
-        document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'block');
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.add('disabled');
-            tab.style.pointerEvents = "none"; // Disable pointer events
-        });
+        // // Show the overlays and disable interactions
+        // document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'block');
+        // document.querySelectorAll('.tab-content').forEach(tab => {
+        //     tab.classList.add('disabled');
+        //     tab.style.pointerEvents = "none"; // Disable pointer events
+        // });
 
         clearInterval(accelInterval);
         clearInterval(homeInterval);
@@ -218,6 +218,10 @@ function processMessage(message) {
       const displayStatus = (status === 1) ? 'Tackled' : 'Not Tackled';
       document.getElementById('tackledStatus').textContent = displayStatus;
   }
+  // Parse version: response
+  else if (message.startsWith('version:')) {
+    document.getElementById('version').textContent = message.split(':')[1];
+  }
 }
 
 
@@ -238,28 +242,6 @@ document.getElementById('setHomeColorButton').addEventListener('click', async ()
   // Send command to set LED color
   await writeToDevice(`rgb:${rgb.r},${rgb.g},${rgb.b}\n`);
 });
-
-// document.getElementById('homeAwayToggle').addEventListener('change', async (event) => {
-//   let status = event.target.checked ? 'Home' : 'Away';
-//   document.getElementById('homeAwayStatus').textContent = status;
-//   // Send serial command here with the status
-//   if( status == 'Home' ) {
-//     await writeToDevice('home:1\n');
-//   } else {  
-//     await writeToDevice('home:0\n');
-//   }
-// });
-
-// document.getElementById('eligibilityToggle').addEventListener('change', async (event) => {
-//   let status = event.target.checked ? 'Eligible' : 'Ineligible';
-//   document.getElementById('eligibilityStatus').textContent = status;
-//   // Send serial command here with the status
-//   if( status == 'Eligible' ) {
-//     await writeToDevice('eligible:1\n');
-//   } else {  
-//     await writeToDevice('eligible:0\n');
-//   }
-// });
 
 function showTab(tabName, event) {
   // Get all tab content elements and hide them
