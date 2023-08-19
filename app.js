@@ -105,23 +105,26 @@ connectButton.addEventListener('click', async () => {
             tab.style.pointerEvents = "auto"; // Enable pointer events
         });
 
+        writeToDevice(`version\n`);
+
         // Setup Periodic Requests
-        
         const accelInterval = setInterval(() => {
-          writeToDevice(`accel\nhome\neligible\ntackled\n`);
-        }, 500);
+          writeToDevice(`accel\n`);
+        }, 200);
 
-        // const homeInterval = setInterval(() => {
-        //   writeToDevice(`home\n`);
-        // }, 2000);
+        const homeInterval = setInterval(() => {
+          writeToDevice(`home\n`);
+        }, 1000);
 
-        // const eligibleInterval = setInterval(() => {
-        //   writeToDevice(`eligible\n`);
-        // }, 2000);
+        const eligibleInterval = setInterval(() => {
+          writeToDevice(`eligible\n`);
+        }, 1000);
 
-        // const tackledInterval = setInterval(() => {
-        //   writeToDevice(`tackled\n`);
-        // }, 2000);
+        const tackledInterval = setInterval(() => {
+          writeToDevice(`tackled\n`);
+        }, 1000);
+
+
 
   } else { // If currently disconnected
         // Show the overlays and disable interactions
