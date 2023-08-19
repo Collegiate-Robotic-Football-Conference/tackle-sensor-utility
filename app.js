@@ -7,6 +7,8 @@ let outputStream;
 
 let connected = false;
 
+let accelInterval, homeInterval, eligibleInterval, tackledInterval;
+
 function logMessage(message, type) {
   const log = document.getElementById('log');
   const span = document.createElement('span');
@@ -57,9 +59,7 @@ connectButton.addEventListener('click', async () => {
       logMessage('Disconnected', 'status');
       connected = false;
       connectButton.textContent = 'Connect';  // Update button text
-      // Disable the tabs
-      document.querySelector('.tab-button.active').click();
-      document.querySelectorAll('.tab-button').forEach(btn => btn.disabled = true);
+      
     } catch (err) {
       logMessage('Error disconnecting: ' + err.message, 'error');
     }
@@ -88,8 +88,7 @@ connectButton.addEventListener('click', async () => {
 
       connected = true;
       connectButton.textContent = 'Disconnect';  // Update button text
-      // Enable the tabs
-      document.querySelectorAll('.tab-button').forEach(btn => btn.disabled = false);
+
     } catch (err) {
       logMessage('Error connecting: ' + err.message, 'error');
       connectButton.textContent = 'Connect';  // Revert button text if connection failed
@@ -98,41 +97,34 @@ connectButton.addEventListener('click', async () => {
 
   // If currently connected
   if (connected) {
-        // // Remove the overlays and enable interactions
-        // document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'none');
-        // document.querySelectorAll('.tab-content').forEach(tab => {
-        //     tab.classList.remove('disabled');
-        //     tab.style.pointerEvents = "auto"; // Enable pointer events
-        // });
 
         writeToDevice(`version\n`);
 
         // Setup Periodic Requests
-        const accelInterval = setInterval(() => {
+        accelInterval = setInterval(() => {
           writeToDevice(`accel\n`);
         }, 200);
 
-        const homeInterval = setInterval(() => {
+        homeInterval = setInterval(() => {
           writeToDevice(`home\n`);
         }, 1000);
 
-        const eligibleInterval = setInterval(() => {
+        eligibleInterval = setInterval(() => {
           writeToDevice(`eligible\n`);
         }, 1000);
 
-        const tackledInterval = setInterval(() => {
+        tackledInterval = setInterval(() => {
           writeToDevice(`tackled\n`);
         }, 1000);
 
-
-
   } else { // If currently disconnected
-        // // Show the overlays and disable interactions
-        // document.querySelectorAll('.tab-overlay').forEach(overlay => overlay.style.display = 'block');
-        // document.querySelectorAll('.tab-content').forEach(tab => {
-        //     tab.classList.add('disabled');
-        //     tab.style.pointerEvents = "none"; // Disable pointer events
-        // });
+        document.getElementById('version').textContent = 'Unknown';
+        document.getElementById('tackledStatus').textContent = 'Unknown';
+        document.getElementById('eligibilityStatus').textContent = 'Unknown';
+        document.getElementById('homeAwayStatus').textContent = 'Unknown';
+        document.getElementById('accelX').textContent = 'Unknown';
+        document.getElementById('accelY').textContent = 'Unknown';
+        document.getElementById('accelZ').textContent = 'Unknown';
 
         clearInterval(accelInterval);
         clearInterval(homeInterval);
@@ -224,7 +216,6 @@ function processMessage(message) {
   }
 }
 
-
 // Function to write to the device
 async function writeToDevice(cmd) {
     const writer = outputStream.getWriter();
@@ -242,20 +233,6 @@ document.getElementById('setHomeColorButton').addEventListener('click', async ()
   // Send command to set LED color
   await writeToDevice(`rgb:${rgb.r},${rgb.g},${rgb.b}\n`);
 });
-
-function showTab(tabName, event) {
-  // Get all tab content elements and hide them
-  let tabContents = document.querySelectorAll('.tab-content');
-  tabContents.forEach(tc => tc.style.display = "none");
-
-  // Deactivate all tab buttons
-  let tabButtons = document.querySelectorAll('.tab-button');
-  tabButtons.forEach(btn => btn.classList.remove('active'));
-
-  // Show the clicked tab content and activate the button
-  document.getElementById(tabName).style.display = "block";
-  event.currentTarget.classList.add('active');
-}
 
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
