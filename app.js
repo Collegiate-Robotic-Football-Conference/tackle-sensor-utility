@@ -103,7 +103,7 @@ connectButton.addEventListener('click', async () => {
         // Setup Periodic Requests
         accelInterval = setInterval(() => {
           writeToDevice(`accel\n`);
-        }, 200);
+        }, 250);
 
         homeInterval = setInterval(() => {
           writeToDevice(`home\n`);
