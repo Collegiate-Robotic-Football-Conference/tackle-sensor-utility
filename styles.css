@@ -7,8 +7,8 @@ body {
 
 .app-container {
     position: absolute;
-    top: 2vh;
-    left: 2vw;
+    top: 0vh;
+    left: 0vw;
     width: 96vw;
     height: 96vh;
     background-color: #282828;

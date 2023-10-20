@@ -15,13 +15,13 @@ function logMessage(message, type) {
   
   // Set the color based on the type
   if (type === 'status') {
-      span.style.color = '#276880';
+      span.style.color = '#FA7D09';
   } else if (type === 'command') {
-      span.style.color = '#57ACDC';
+      span.style.color = '#9DB2BF';
   } else if (type === 'response') {
-      span.style.color = '#60C689';
+      span.style.color = '#526D82';
   } else if (type === 'error') {
-    span.style.color = '#E91E63';
+    span.style.color = '#FF4301';
   }
 
   span.textContent = message;
