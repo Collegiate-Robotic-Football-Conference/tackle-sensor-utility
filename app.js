@@ -278,7 +278,7 @@ function hexToRgb(hex) {
     labels: [],  // This will hold the timestamps or data points count
     datasets: [
         {
-            label: 'X Max',
+            label: 'X Acceleration',
             data: [],
             fill: '+1',  // Fill to next dataset
             backgroundColor: 'rgba(40, 71, 92, 0.5)',  // Semi-transparent fill
@@ -293,7 +293,7 @@ function hexToRgb(hex) {
             pointRadius: 0,
         },
         {
-            label: 'Y Max',
+            label: 'Y Acceleration',
             data: [],
             fill: '+1',  // Fill to next dataset
             backgroundColor: 'rgba(47, 136, 134, 0.5)',
@@ -350,6 +350,14 @@ let areaConfig = {
                 mode: 'index',
                 intersect: false,
             },
+            legend: {
+              labels: {
+                filter: function(legendItem, chartData) {
+                  // Only display the legend for datasets labeled 'X Acceleration' and 'Y Acceleration'
+                  return legendItem.text === 'X Acceleration' || legendItem.text === 'Y Acceleration';
+                }
+              }
+            }
         },
         interaction: {
             mode: 'nearest',
