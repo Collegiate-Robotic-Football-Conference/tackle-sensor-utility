@@ -139,9 +139,9 @@ connectButton.addEventListener('click', async () => {
   }
   // Clear the chart data on connect or disconnect
   start_time = Date.now()
-  accelData.labels = [];
-  accelData.datasets.forEach(dataset => dataset.data = []);
-  accelChart.update();
+  accelAreaData.labels = [];
+  accelAreaData.datasets.forEach(dataset => dataset.data = []);
+  accelAreaChart.update();
 });
 
 let dataBuffer = '';
@@ -278,7 +278,7 @@ function hexToRgb(hex) {
     labels: [],  // This will hold the timestamps or data points count
     datasets: [
         {
-            label: 'X Acceleration',
+            label: 'X Max',
             data: [],
             fill: '+1',  // Fill to next dataset
             backgroundColor: 'rgba(40, 71, 92, 0.5)',  // Semi-transparent fill
@@ -293,7 +293,7 @@ function hexToRgb(hex) {
             pointRadius: 0,
         },
         {
-            label: 'Y Acceleration',
+            label: 'Y Max',
             data: [],
             fill: '+1',  // Fill to next dataset
             backgroundColor: 'rgba(47, 136, 134, 0.5)',
@@ -353,8 +353,24 @@ let areaConfig = {
             legend: {
               labels: {
                 filter: function(legendItem, chartData) {
-                  // Only display the legend for datasets labeled 'X Acceleration' and 'Y Acceleration'
+                  // Only display the legend for datasets labeled 'X' and 'Y'
                   return legendItem.text === 'X Acceleration' || legendItem.text === 'Y Acceleration';
+                },
+                generateLabels: function(chartData) {
+                    originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chartData);
+
+                    // Combine labels for 'X' and 'Y'
+                    originalLabels.forEach(label => {
+                        // Check if label is for 'X'
+                        if (label.text.includes('X Max')) {
+                            label.text = 'X Acceleration';
+                        }
+                        // Check if label is for 'Y'
+                        else if (label.text.includes('Y Max')) {
+                            label.text = 'Y Acceleration';
+                        }
+                    });
+                    return originalLabels;
                 }
               }
             }
