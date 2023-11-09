@@ -219,7 +219,7 @@ function processMessage(message) {
               throw new Error('Invalid acceleration data');
           }
 
-          addDataToChart(xmin, xmax, ymin, ymax)
+          addDataToAreaChart(xmin, xmax, ymin, ymax)
       } catch (err) {
           logMessage('Error parsing response: ' + err.message, 'error');
       }
@@ -274,25 +274,45 @@ function hexToRgb(hex) {
     } : null;
   }
 
-let accelData = {
-  labels: [], // This will hold the timestamps or data points count
-  datasets: [{
-      label: 'Acceleration X',
-      data: [], // This will hold objects {x: timestamp, y: meanValue, errorMin: xmin, errorMax: xmax}
-      borderColor: '#28475C',
-      fill: false,
-  }, {
-      label: 'Acceleration Y',
-      data: [], // This will hold objects {x: timestamp, y: meanValue, errorMin: ymin, errorMax: ymax}
-      borderColor: '#2F8886',
-      fill: false,
-  }]
+  let accelAreaData = {
+    labels: [],  // This will hold the timestamps or data points count
+    datasets: [
+        {
+            label: 'X Max',
+            data: [],
+            fill: '+1',  // Fill to next dataset
+            backgroundColor: 'rgba(40, 71, 92, 0.5)',  // Semi-transparent fill
+            borderColor: '#28475C',
+            pointRadius: 0, // Removes the point markers
+        },
+        {
+            label: 'X Min',
+            data: [],
+            fill: false,  // No fill for this dataset
+            borderColor: '#28475C',
+            pointRadius: 0,
+        },
+        {
+            label: 'Y Max',
+            data: [],
+            fill: '+1',  // Fill to next dataset
+            backgroundColor: 'rgba(47, 136, 134, 0.5)',
+            borderColor: '#2F8886',
+            pointRadius: 0,
+        },
+        {
+            label: 'Y Min',
+            data: [],
+            fill: false,
+            borderColor: '#2F8886',
+            pointRadius: 0,
+        }
+    ]
 };
 
-
-let config = {
+let areaConfig = {
     type: 'line',
-    data: accelData,
+    data: accelAreaData,
     options: {
         scales: {
             x: {
@@ -304,68 +324,66 @@ let config = {
                 }
             },
             y: {
-                min: -2000,
-                max: 2000,
+                beginAtZero: false,
                 title: {
                     display: true,
-                    text: '0.001*g'
-                }
+                    text: '(0.001*g)'
+                },
+                suggestedMin: -2000, // Suggested minimum value for the scale
+                suggestedMax: 2000,  // Suggested maximum value for the scale
             }
         },
-        plugins: {
-            errorBars: {
-                color: '#212529'
+        elements: {
+            line: {
+                tension: 0.4 // Smoothes the line
             }
         },
         animation: {
             duration: 0 // general animation time
         },
-        responsiveAnimationDuration: 0 // animation duration after a resize
+        responsiveAnimationDuration: 0, // animation duration after a resize
+        plugins: {
+            filler: {
+                propagate: true
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+            },
+        },
+        interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+        }
     }
 };
 
-let accelChart = new Chart(
+let accelAreaChart = new Chart(
     document.getElementById('accelChart'),
-    config
+    areaConfig
 );
 
+
 document.getElementById('clearChart').addEventListener('click', () => {
-    accelData.labels = [];
-    accelData.datasets.forEach(dataset => dataset.data = []);
-    accelChart.update();
+    accelAreaData.labels = [];
+    accelAreaData.datasets.forEach(dataset => dataset.data = []);
+    accelAreaChart.update();
 });
 
-// When you receive acceleration data, you can update the chart like this:
-// function addDataToChart(x, y, z) {
-//     if (accelData.labels.length > 100) { // Assuming 10 data points per second for 10 seconds
-//         accelData.labels.shift();  // remove the first label
-//         accelData.datasets.forEach(dataset => dataset.data.shift());  // remove the first data point from each dataset
-//     }
-//     accelData.labels.push(Date.now() - start_time);  // Add current time as a label
-//     accelData.datasets[0].data.push(x);
-//     accelData.datasets[1].data.push(y);
-//     accelData.datasets[2].data.push(z);
-//     accelChart.update();
-// }
-
-function addDataToChart(xmin, xmax, ymin, ymax) {
-  if (accelData.labels.length > 100) { // Assuming 10 data points per second for 10 seconds
-      accelData.labels.shift(); // remove the first label
-      accelData.datasets.forEach(dataset => {
-          dataset.data.shift(); // remove the first data point from each dataset
-      });
+// When you receive acceleration range data, you can update the chart like this:
+function addDataToAreaChart(xMin, xMax, yMin, yMax) {
+  if (accelAreaData.labels.length > 100) { // Assuming 10 data points per second for 10 seconds
+      accelAreaData.labels.shift();  // remove the first label
+      accelAreaData.datasets.forEach(dataset => dataset.data.shift());  // remove the first data point from each dataset
   }
   const currentTime = Date.now() - start_time;
-  accelData.labels.push(currentTime); // Add current time as a label
 
-  // Calculate the mean value
-  const xMean = (xmin + xmax) / 2;
-  const yMean = (ymin + ymax) / 2;
-
-  // Push the data with error bars
-  accelData.datasets[0].data.push({ x: currentTime, y: xMean, rMin: xmin, rMax: xmax });
-  accelData.datasets[1].data.push({ x: currentTime, y: yMean, rMin: ymin, rMax: ymax });
-
-  accelChart.update();
+  accelAreaData.labels.push(currentTime);  // Add current time as a label
+  accelAreaData.datasets[0].data.push(xMax);
+  accelAreaData.datasets[1].data.push(xMin);
+  accelAreaData.datasets[2].data.push(yMax);
+  accelAreaData.datasets[3].data.push(yMin);
+  
+  accelAreaChart.update();
 }
-
