@@ -9,6 +9,8 @@ let connected = false;
 
 let accelInterval, homeInterval, eligibleInterval, tackledInterval;
 
+let start_time = Date.now()
+
 function logMessage(message, type) {
   const log = document.getElementById('log');
   const span = document.createElement('span');
@@ -98,23 +100,27 @@ connectButton.addEventListener('click', async () => {
   // If currently connected
   if (connected) {
 
-        writeToDevice(`version\n`);
+        writeToDevice(`v\n`);
 
         // Setup Periodic Requests
         accelInterval = setInterval(() => {
-          writeToDevice(`accel\n`);
+          writeToDevice(`a\n`);
+        }, 500);
+
+        accelInterval = setInterval(() => {
+          writeToDevice(`r\n`);
         }, 250);
 
         homeInterval = setInterval(() => {
-          writeToDevice(`home\n`);
+          writeToDevice(`h\n`);
         }, 1000);
 
         eligibleInterval = setInterval(() => {
-          writeToDevice(`eligible\n`);
+          writeToDevice(`e\n`);
         }, 1000);
 
         tackledInterval = setInterval(() => {
-          writeToDevice(`tackled\n`);
+          writeToDevice(`t\n`);
         }, 1000);
 
   } else { // If currently disconnected
@@ -131,6 +137,11 @@ connectButton.addEventListener('click', async () => {
         clearInterval(eligibleInterval);
         clearInterval(tackledInterval);
   }
+  // Clear the chart data on connect or disconnect
+  start_time = Date.now()
+  accelData.labels = [];
+  accelData.datasets.forEach(dataset => dataset.data = []);
+  accelChart.update();
 });
 
 let dataBuffer = '';
@@ -162,7 +173,7 @@ function processMessage(message) {
   logMessage(message, 'response');
 
   // Parse GET_ACCEL response
-  if (message.startsWith('accel:')) {
+  if (message.startsWith('a:')) {
       try {
           const parts = message.split(':');
           if (parts.length < 2) {
@@ -182,36 +193,56 @@ function processMessage(message) {
           document.getElementById('accelY').textContent = y;
           document.getElementById('accelZ').textContent = z;
 
-          if (isNaN(x) || isNaN(y) || isNaN(z)) {
+      } catch (err) {
+          logMessage('Error parsing response: ' + err.message, 'error');
+      }
+  }
+  // Parse get accel range response
+  if (message.startsWith('r:')) {
+      try {
+          const parts = message.split(':');
+          if (parts.length < 2) {
+              throw new Error('Invalid response format');
+          }
+
+          const data = parts[1].split(',');
+          if (data.length < 4) {
+              throw new Error('Missing acceleration data');
+          }
+
+          const xmin = parseFloat(data[0]);
+          const xmax = parseFloat(data[1]);
+          const ymin = parseFloat(data[2]);
+          const ymax = parseFloat(data[3]);
+
+          if (isNaN(xmin) || isNaN(xmax) || isNaN(ymin) || isNaN(ymax)) {
               throw new Error('Invalid acceleration data');
           }
 
-          // Now x, y, and z contain the acceleration data
-          // You can use these values to update your UI
-          console.log(`Acceleration - X: ${x}, Y: ${y}, Z: ${z}`);
+          addDataToChart(xmin, xmax, ymin, ymax)
       } catch (err) {
           logMessage('Error parsing response: ' + err.message, 'error');
       }
   }
   // Parse home: response
-  else if (message.startsWith('home:')) {
+  else if (message.startsWith('h:')) {
       const status = parseInt(message.split(':')[1], 10);
       const displayStatus = (status === 1) ? 'Home' : 'Away';
       document.getElementById('homeAwayStatus').textContent = displayStatus;
   }
   // Parse eligible: response
-  else if (message.startsWith('eligible:')) {
+  else if (message.startsWith('e:')) {
       const status = parseInt(message.split(':')[1], 10);
       const displayStatus = (status === 1) ? 'Eligible' : 'Ineligible';
       document.getElementById('eligibilityStatus').textContent = displayStatus;
   }
-  else if (message.startsWith('tackled:')) {
+  else if (message.startsWith('t:')) {
       const status = parseInt(message.split(':')[1], 10);
       const displayStatus = (status === 1) ? 'Tackled' : 'Not Tackled';
       document.getElementById('tackledStatus').textContent = displayStatus;
   }
   // Parse version: response
-  else if (message.startsWith('version:')) {
+  else if (message.startsWith('v:')) {
     document.getElementById('version').textContent = message.split(':')[1];
   }
 }
@@ -231,7 +262,7 @@ document.getElementById('setHomeColorButton').addEventListener('click', async ()
   let rgb = hexToRgb(color);
 
   // Send command to set LED color
-  await writeToDevice(`rgb:${rgb.r},${rgb.g},${rgb.b}\n`);
+  await writeToDevice(`l:${rgb.r},${rgb.g},${rgb.b}\n`);
 });
 
 function hexToRgb(hex) {
@@ -242,3 +273,99 @@ function hexToRgb(hex) {
       b: parseInt(result[3], 16)
     } : null;
   }
+
+let accelData = {
+  labels: [], // This will hold the timestamps or data points count
+  datasets: [{
+      label: 'Acceleration X',
+      data: [], // This will hold objects {x: timestamp, y: meanValue, errorMin: xmin, errorMax: xmax}
+      borderColor: '#28475C',
+      fill: false,
+  }, {
+      label: 'Acceleration Y',
+      data: [], // This will hold objects {x: timestamp, y: meanValue, errorMin: ymin, errorMax: ymax}
+      borderColor: '#2F8886',
+      fill: false,
+  }]
+};
+
+
+let config = {
+    type: 'line',
+    data: accelData,
+    options: {
+        scales: {
+            x: {
+                type: 'linear',
+                position: 'bottom',
+                title: {
+                    display: true,
+                    text: 'milliseconds'
+                }
+            },
+            y: {
+                min: -2000,
+                max: 2000,
+                title: {
+                    display: true,
+                    text: '0.001*g'
+                }
+            }
+        },
+        plugins: {
+            errorBars: {
+                color: '#212529'
+            }
+        },
+        animation: {
+            duration: 0 // general animation time
+        },
+        responsiveAnimationDuration: 0 // animation duration after a resize
+    }
+};
+
+let accelChart = new Chart(
+    document.getElementById('accelChart'),
+    config
+);
+
+document.getElementById('clearChart').addEventListener('click', () => {
+    accelData.labels = [];
+    accelData.datasets.forEach(dataset => dataset.data = []);
+    accelChart.update();
+});
+
+// When you receive acceleration data, you can update the chart like this:
+// function addDataToChart(x, y, z) {
+//     if (accelData.labels.length > 100) { // Assuming 10 data points per second for 10 seconds
+//         accelData.labels.shift();  // remove the first label
+//         accelData.datasets.forEach(dataset => dataset.data.shift());  // remove the first data point from each dataset
+//     }
+//     accelData.labels.push(Date.now() - start_time);  // Add current time as a label
+//     accelData.datasets[0].data.push(x);
+//     accelData.datasets[1].data.push(y);
+//     accelData.datasets[2].data.push(z);
+//     accelChart.update();
+// }
+
+function addDataToChart(xmin, xmax, ymin, ymax) {
+  if (accelData.labels.length > 100) { // Assuming 10 data points per second for 10 seconds
+      accelData.labels.shift(); // remove the first label
+      accelData.datasets.forEach(dataset => {
+          dataset.data.shift(); // remove the first data point from each dataset
+      });
+  }
+  const currentTime = Date.now() - start_time;
+  accelData.labels.push(currentTime); // Add current time as a label
+
+  // Calculate the mean value
+  const xMean = (xmin + xmax) / 2;
+  const yMean = (ymin + ymax) / 2;
+
+  // Push the data with error bars
+  accelData.datasets[0].data.push({ x: currentTime, y: xMean, rMin: xmin, rMax: xmax });
+  accelData.datasets[1].data.push({ x: currentTime, y: yMean, rMin: ymin, rMax: ymax });
+
+  accelChart.update();
+}
+
