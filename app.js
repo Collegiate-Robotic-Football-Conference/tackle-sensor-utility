@@ -1,3 +1,4 @@
+// Existing Global Variables
 let port;
 let reader;
 let inputDone;
@@ -7,10 +8,15 @@ let outputStream;
 
 let connected = false;
 
-let accelInterval, homeInterval, eligibleInterval, tackledInterval;
+// Updated Interval Variables
+let accelAInterval, accelRInterval, homeInterval, eligibleInterval, tackledInterval;
 
-let start_time = Date.now()
+// Fade LEDs Intervals (if needed)
+let fadeInterval;
 
+let start_time = Date.now();
+
+// Existing Logging Function
 function logMessage(message, type) {
   const log = document.getElementById('log');
   const span = document.createElement('span');
@@ -34,6 +40,7 @@ function logMessage(message, type) {
   log.scrollTop = log.scrollHeight;
 }
 
+// Existing Initial Log Messages
 logMessage('Tackle Sensor Configurator', 'status');
 logMessage('--------------------------', 'status');
 logMessage('Connect a tackle sensor to your PC via a serial port.', 'status');
@@ -42,6 +49,7 @@ logMessage('', 'status');
 
 const connectButton = document.getElementById('connect-button');
 
+// Existing Connect Button Event Listener
 connectButton.addEventListener('click', async () => {
   if (connected) {
     // Disconnect from the device
@@ -62,6 +70,12 @@ connectButton.addEventListener('click', async () => {
       connected = false;
       connectButton.textContent = 'Connect';  // Update button text
       
+      // Reset UI Elements
+      resetUI();
+
+      // Clear all intervals
+      clearAllIntervals();
+
     } catch (err) {
       logMessage('Error disconnecting: ' + err.message, 'error');
     }
@@ -91,52 +105,17 @@ connectButton.addEventListener('click', async () => {
       connected = true;
       connectButton.textContent = 'Disconnect';  // Update button text
 
+      // Send initial commands and setup intervals
+      await writeToDevice(`v\n`);
+
+      setupIntervals();
+      
     } catch (err) {
       logMessage('Error connecting: ' + err.message, 'error');
       connectButton.textContent = 'Connect';  // Revert button text if connection failed
     }
   }
 
-  // If currently connected
-  if (connected) {
-
-        writeToDevice(`v\n`);
-
-        // Setup Periodic Requests
-        accelInterval = setInterval(() => {
-          writeToDevice(`a\n`);
-        }, 500);
-
-        accelInterval = setInterval(() => {
-          writeToDevice(`r\n`);
-        }, 250);
-
-        homeInterval = setInterval(() => {
-          writeToDevice(`h\n`);
-        }, 1000);
-
-        eligibleInterval = setInterval(() => {
-          writeToDevice(`e\n`);
-        }, 1000);
-
-        tackledInterval = setInterval(() => {
-          writeToDevice(`t\n`);
-        }, 1000);
-
-  } else { // If currently disconnected
-        document.getElementById('version').textContent = 'Unknown';
-        document.getElementById('tackledStatus').textContent = 'Unknown';
-        document.getElementById('eligibilityStatus').textContent = 'Unknown';
-        document.getElementById('homeAwayStatus').textContent = 'Unknown';
-        document.getElementById('accelX').textContent = 'Unknown';
-        document.getElementById('accelY').textContent = 'Unknown';
-        document.getElementById('accelZ').textContent = 'Unknown';
-
-        clearInterval(accelInterval);
-        clearInterval(homeInterval);
-        clearInterval(eligibleInterval);
-        clearInterval(tackledInterval);
-  }
   // Clear the chart data on connect or disconnect
   start_time = Date.now()
   accelAreaData.labels = [];
@@ -144,6 +123,7 @@ connectButton.addEventListener('click', async () => {
   accelAreaChart.update();
 });
 
+// Existing Read Loop Function
 let dataBuffer = '';
 
 async function readLoop() {
@@ -169,6 +149,7 @@ async function readLoop() {
   }
 }
 
+// Existing Process Message Function
 function processMessage(message) {
   logMessage(message, 'response');
 
@@ -252,7 +233,7 @@ async function writeToDevice(cmd) {
     const writer = outputStream.getWriter();
     writer.write(cmd);
     writer.releaseLock();
-    logMessage(cmd, 'command');
+    logMessage(cmd.trim(), 'command');
 }
 
 document.getElementById('setHomeColorButton').addEventListener('click', async () => {
@@ -272,42 +253,42 @@ function hexToRgb(hex) {
       g: parseInt(result[2], 16),
       b: parseInt(result[3], 16)
     } : null;
-  }
+}
 
-  let accelAreaData = {
-    labels: [],  // This will hold the timestamps or data points count
-    datasets: [
-        {
-            label: 'X Max',
-            data: [],
-            fill: '+1',  // Fill to next dataset
-            backgroundColor: 'rgba(40, 71, 92, 0.5)',  // Semi-transparent fill
-            borderColor: '#28475C',
-            pointRadius: 0, // Removes the point markers
-        },
-        {
-            label: 'X Min',
-            data: [],
-            fill: false,  // No fill for this dataset
-            borderColor: '#28475C',
-            pointRadius: 0,
-        },
-        {
-            label: 'Y Max',
-            data: [],
-            fill: '+1',  // Fill to next dataset
-            backgroundColor: 'rgba(47, 136, 134, 0.5)',
-            borderColor: '#2F8886',
-            pointRadius: 0,
-        },
-        {
-            label: 'Y Min',
-            data: [],
-            fill: false,
-            borderColor: '#2F8886',
-            pointRadius: 0,
-        }
-    ]
+let accelAreaData = {
+  labels: [],  // This will hold the timestamps or data points count
+  datasets: [
+      {
+          label: 'X Max',
+          data: [],
+          fill: '+1',  // Fill to next dataset
+          backgroundColor: 'rgba(40, 71, 92, 0.5)',  // Semi-transparent fill
+          borderColor: '#28475C',
+          pointRadius: 0, // Removes the point markers
+      },
+      {
+          label: 'X Min',
+          data: [],
+          fill: false,  // No fill for this dataset
+          borderColor: '#28475C',
+          pointRadius: 0,
+      },
+      {
+          label: 'Y Max',
+          data: [],
+          fill: '+1',  // Fill to next dataset
+          backgroundColor: 'rgba(47, 136, 134, 0.5)',
+          borderColor: '#2F8886',
+          pointRadius: 0,
+      },
+      {
+          label: 'Y Min',
+          data: [],
+          fill: false,
+          borderColor: '#2F8886',
+          pointRadius: 0,
+      }
+  ]
 };
 
 let areaConfig = {
@@ -409,5 +390,73 @@ function addDataToAreaChart(xMin, xMax, yMin, yMax) {
   accelAreaData.datasets[2].data.push(yMax);
   accelAreaData.datasets[3].data.push(yMin);
   
+  accelAreaChart.update();
+}
+
+// New Event Listeners for Fade LEDs Control
+document.getElementById('enableFadeButton').addEventListener('click', async () => {
+    if (connected) {
+        await writeToDevice(`f:1\n`);  // Send Enable Fade Command
+    } else {
+        logMessage('Cannot enable fade. Device not connected.', 'error');
+    }
+});
+
+document.getElementById('disableFadeButton').addEventListener('click', async () => {
+    if (connected) {
+        await writeToDevice(`f:0\n`);  // Send Disable Fade Command
+    } else {
+        logMessage('Cannot disable fade. Device not connected.', 'error');
+    }
+});
+
+// Existing Function to Reset UI Elements
+function resetUI() {
+  document.getElementById('version').textContent = 'Unknown';
+  document.getElementById('tackledStatus').textContent = 'Unknown';
+  document.getElementById('eligibilityStatus').textContent = 'Unknown';
+  document.getElementById('homeAwayStatus').textContent = 'Unknown';
+  document.getElementById('accelX').textContent = 'Unknown';
+  document.getElementById('accelY').textContent = 'Unknown';
+  document.getElementById('accelZ').textContent = 'Unknown';
+}
+
+// Existing Function to Setup Intervals
+function setupIntervals() {
+  accelAInterval = setInterval(() => {
+    writeToDevice(`a\n`);
+  }, 500);
+
+  accelRInterval = setInterval(() => {
+    writeToDevice(`r\n`);
+  }, 250);
+
+  homeInterval = setInterval(() => {
+    writeToDevice(`h\n`);
+  }, 1000);
+
+  eligibleInterval = setInterval(() => {
+    writeToDevice(`e\n`);
+  }, 1000);
+
+  tackledInterval = setInterval(() => {
+    writeToDevice(`t\n`);
+  }, 1000);
+}
+
+// Existing Function to Clear All Intervals
+function clearAllIntervals() {
+  clearInterval(accelAInterval);
+  clearInterval(accelRInterval);
+  clearInterval(homeInterval);
+  clearInterval(eligibleInterval);
+  clearInterval(tackledInterval);
+  // If you have any fade-related intervals, clear them here
+}
+
+// Existing Function to Clear Chart Data
+function clearChartData() {
+  accelAreaData.labels = [];
+  accelAreaData.datasets.forEach(dataset => dataset.data = []);
   accelAreaChart.update();
 }

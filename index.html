@@ -19,51 +19,58 @@
         <div class="flex-container">
             <div class="left-content">
                 <!-- Configuration Content -->
-        <div id="configure">
-            <!-- Color Control -->
-            <div class="color-control">
-                <div class="color-option">
-                    <label for="homeColorPicker">Select Home Jersey Color:</label>
-                    <input type="color" id="homeColorPicker" value="#00FF00">
-                    <button id="setHomeColorButton">Send</button>
+                <div id="configure">
+                    <!-- Color Control -->
+                    <div class="color-control">
+                        <div class="color-option">
+                            <label for="homeColorPicker">Select Home Jersey Color:</label>
+                            <input type="color" id="homeColorPicker" value="#00FF00">
+                            <button id="setHomeColorButton">Send</button>
+                        </div>
+                        
+                        <!-- Fade LEDs Control -->
+                        <div class="fade-control">
+                            <label for="fadeLEDs">Fade LEDs when Ineligible:</label>
+                            <button id="enableFadeButton" class="fade-button">Enable</button>
+                            <button id="disableFadeButton" class="fade-button">Disable</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
     
-        <!-- Monitor Content -->
-        <div id="monitor">
-            <h3>Device Status:</h3>
-            <table>
-                <tr>
-                    <td><strong>Version:</strong></td>
-                    <td id="version">Unknown</td>
-                </tr>
-                <tr>
-                    <td><strong>Acceleration X:</strong></td>
-                    <td id="accelX">Unknown</td>
-                </tr>
-                <tr>
-                    <td><strong>Acceleration Y:</strong></td>
-                    <td id="accelY">Unknown</td>
-                </tr>
-                <tr>
-                    <td><strong>Acceleration Z:</strong></td>
-                    <td id="accelZ">Unknown</td>
-                </tr>
-                <tr>
-                    <td><strong>Output Tackled Status:</strong></td>
-                    <td id="tackledStatus">Unknown</td>
-                </tr>
-                <tr>
-                    <td><strong>Input Home/Away:</strong></td>
-                    <td id="homeAwayStatus">Unknown</td>
-                </tr>
-                <tr>
-                    <td><strong>Input Eligible/Ineligible:</strong></td>
-                    <td id="eligibilityStatus">Unknown</td>
-                </tr>
-            </table>
-        </div>
+                <!-- Monitor Content -->
+                <div id="monitor">
+                    <h3>Device Status:</h3>
+                    <table>
+                        <tr>
+                            <td><strong>Version:</strong></td>
+                            <td id="version">Unknown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Acceleration X:</strong></td>
+                            <td id="accelX">Unknown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Acceleration Y:</strong></td>
+                            <td id="accelY">Unknown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Acceleration Z:</strong></td>
+                            <td id="accelZ">Unknown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Output Tackled Status:</strong></td>
+                            <td id="tackledStatus">Unknown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Input Home/Away:</strong></td>
+                            <td id="homeAwayStatus">Unknown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Input Eligible/Ineligible:</strong></td>
+                            <td id="eligibilityStatus">Unknown</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
             <div class="right-content">
                 <!-- Chart container -->
@@ -73,9 +80,6 @@
                 <button id="clearChart">Clear Plot</button>
             </div>
         </div>
-
-        
-
 
         <!-- Log Section -->
         <div class="log-container">
